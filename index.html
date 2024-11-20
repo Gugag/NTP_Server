@@ -36,7 +36,7 @@
         async function fetchNTPTime() {
             // Simulate getting the time from a server
             const serverTime = new Date().toISOString();
-            document.getElementById("time").textContent = `Server Time: ${serverTime}`;
+            document.getElementById("time").textContent = `Server Time UTC: ${serverTime}`;
         }
         fetchNTPTime();
         setInterval(fetchNTPTime, 1000);
