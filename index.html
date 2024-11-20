@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NTP Server</title>
+</head>
+<body>
+    <h1>NTP Time Server</h1>
+    <p id="time">Fetching time...</p>
+    <script>
+        async function fetchNTPTime() {
+            // Simulate getting the time from a server
+            const serverTime = new Date().toISOString();
+            document.getElementById("time").textContent = `Server Time: ${serverTime}`;
+        }
+        fetchNTPTime();
+    </script>
+</body>
+</html>
