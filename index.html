@@ -39,6 +39,7 @@
             document.getElementById("time").textContent = `Server Time: ${serverTime}`;
         }
         fetchNTPTime();
+        setInterval(fetchNTPTime, 1000);
     </script>
 </body>
 </html>
