@@ -9,10 +9,33 @@
     <meta property="og:url"content="https://time.itdata.ge">
     <link rel="icon" type="image/x-icon" href="resized.ico">
     <title>NTP Server</title>
+        <style>
+        body{
+            display: flex;
+            flex-direction: column;
+            margin-top: 20%;
+            text-align: center;
+        }
+        h1{
+            color: rgb(69, 3, 131);
+           
+        }
+
+        #time {
+            color: rgb(21, 188, 21);
+        }
+
+        .container{
+            align-items: center;
+
+        }
+    </style>
 </head>
 <body>
-    <h1>NTP Time Server</h1>
-    <p id="time">Fetching Time</p>
+    <div class="container">
+        <h1>NTP Time Server</h1>
+        <p id="time">Fetching time...</p>
+    </div>
     <script>
         async function fetchNTPTime() {
             // Simulate getting the time from a server
