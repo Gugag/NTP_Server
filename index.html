@@ -84,7 +84,7 @@
     </div>
    
     <script>
-        const timeElement = document.getElementById("time");
+            const timeElement = document.getElementById("time");
         const countrySelector = document.getElementById("country-selector");
 
         // Populate the dropdown with country time zones
@@ -98,11 +98,12 @@
 
         function updateTime() {
             const selectedZone = countrySelector.value || "UTC";
-            const now = new Date();
             try {
-                const options = { timeZone: selectedZone, hour12: false };
-                const formattedTime = now.toLocaleString("en-GB", { ...options, timeStyle: "medium", dateStyle: "medium" });
-                timeElement.textContent = `Time (${selectedZone}): ${formattedTime}`;
+                const now = new Date();
+                const options = { timeZone: selectedZone };
+                const timeInZone = new Date(now.toLocaleString("en-US", options));
+                const isoTime = timeInZone.toISOString();
+                timeElement.textContent = `Time UTC: ${isoTime}`;
             } catch (error) {
                 timeElement.textContent = "Invalid timezone selected!";
             }
