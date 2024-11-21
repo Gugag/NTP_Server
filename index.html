@@ -4,27 +4,34 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta property="og:title" content="NTP Server"> 
-    <meta property="og:description" content="Free NTP Server" > 
+    <meta property="og:description" content="Free NTP Server"> 
     <meta property="og:image" content="https://time.itdata.ge/Time-Zones.256.png"> 
-    <meta property="og:url"content="https://time.itdata.ge">
+    <meta property="og:url" content="https://time.itdata.ge">
     <link rel="icon" type="image/x-icon" href="resized.ico">
     <title>NTP Server</title>
-        <style>
-        body{
+    <style>
+        body {
             font-family: Arial, sans-serif;
             display: flex;
             flex-direction: column;
-            margin-top: 20%;
+            margin-top: 15%;
             text-align: center;
-            }
-            
-        h1, #status{
+            max-width: 800px;
+            margin-left: auto;
+            margin-right: auto;
+            padding: 0 15px;
+        }
+        
+        h1, #status {
             color: rgb(69, 3, 131); 
-            }
-
+        }
+        
         #time {
             color: rgb(21, 188, 21);
-            }
+            font-size: 1em;
+            word-break: break-all;
+        }
+        
         .green-light {
             width: 10px;
             height: 10px;
@@ -33,26 +40,268 @@
             display: inline-block;
             margin-top: 10px;
         }
+        
+        #countrySelect {
+            margin: 10px 0;
+            padding: 2px;
+            font-size: 12px;
+            width: 25%;
+            max-width: 500px;
+            box-sizing: border-box;
+            color: black;
+        }
+
+        select {
+            margin-bottom: 10px;
+            appearance: none;
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            background-color: #ffffff;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            padding: 2px 10px;
+            width: 100%;
+            height: 20px; 
             
+        }
+
+        select {
+            background-image: url('data:image/svg+xml;charset=US-ASCII,%3Csvg xmlns%3D%22http%3A//www.w3.org/2000/svg%22 viewBox%3D%220 0 24 24%22 fill%3D%22none%22 stroke%3D%22%23000000%22 stroke-width%3D%222%22 stroke-linecap%3D%22round%22 stroke-linejoin%3D%22round%22%3E%3Cpolyline points%3D%226 9 12 15 18 9%22/%3E%3C/svg%3E');
+            background-repeat: no-repeat;
+            background-position: right 10px center;
+            background-size: 18px;
+            background-color: #ffffff;
+            color: #040404;
+            cursor: pointer;
+        }
+
+        select::after {
+            content: '\25BC'; /* Unicode character for down arrow */
+            position: absolute;
+            right: 15px;
+            top: 15px;
+            pointer-events: none; /* Ensure clicks go to the select, not the arrow */
+            color: #fff;
+            font-size: 12px;
+        }
     </style>
 </head>
 <body>
     <div>
         <h1>NTP Time Server</h1>
+        <select id="countrySelect">
+            <option value="UTC">UTC (Default)</option>
+        </select>
         <p id="time">Fetching time...</p>
     </div>
-     <div >
-        <span id="status"> TIME.ITDATA.GE Status:</span>
+    <div>
+        <span id="status">TIME.ITDATA.GE Status:</span>
         <div class="green-light"></div>
     </div>
+
     <script>
-        async function fetchNTPTime() {
-            // Simulate getting the time from a server
-            const serverTime = new Date().toISOString();
-            document.getElementById("time").textContent = `Time UTC: ${serverTime}`;
+        // Comprehensive list of all countries with their time zones, sorted by time zone
+        const timeZones = [
+            // Extreme Negative Time Zones (Far West)
+            { name: "United States (Baker Island)", zone: "-12" },
+            { name: "United States (Hawaii)", zone: "-10" },
+            { name: "United States (Alaska)", zone: "-9" },
+            { name: "United States (Pacific)", zone: "-8" },
+            { name: "United States (Mountain)", zone: "-7" },
+            { name: "United States (Central)", zone: "-6" },
+            { name: "United States (Eastern)", zone: "-5" },
+            { name: "United States (Atlantic)", zone: "-4" },
+
+            // North & South America
+            { name: "Canada (Pacific)", zone: "-8" },
+            { name: "Canada (Mountain)", zone: "-7" },
+            { name: "Canada (Central)", zone: "-6" },
+            { name: "Canada (Eastern)", zone: "-5" },
+            { name: "Canada (Atlantic)", zone: "-4" },
+            { name: "Greenland", zone: "-3" },
+            { name: "Mexico", zone: "-6" },
+            { name: "Brazil", zone: "-3" },
+            { name: "Argentina", zone: "-3" },
+            { name: "Chile", zone: "-3" },
+            { name: "Venezuela", zone: "-4" },
+            { name: "Colombia", zone: "-5" },
+            { name: "Peru", zone: "-5" },
+            { name: "Ecuador", zone: "-5" },
+            { name: "Bolivia", zone: "-4" },
+            { name: "Paraguay", zone: "-4" },
+            { name: "Uruguay", zone: "-3" },
+
+            // Zero Time Zone (GMT)
+            { name: "United Kingdom", zone: "+0" },
+            { name: "Ireland", zone: "+0" },
+            { name: "Portugal", zone: "+0" },
+            { name: "Iceland", zone: "+0" },
+            { name: "Ghana", zone: "+0" },
+            { name: "Senegal", zone: "+0" },
+            { name: "Togo", zone: "+0" },
+            { name: "Mauritania", zone: "+0" },
+            { name: "Gambia", zone: "+0" },
+
+            // Positive Time Zones
+            { name: "Western Europe", zone: "+1" },
+            { name: "Spain", zone: "+1" },
+            { name: "France", zone: "+1" },
+            { name: "Germany", zone: "+1" },
+            { name: "Italy", zone: "+1" },
+            { name: "Netherlands", zone: "+1" },
+            { name: "Belgium", zone: "+1" },
+            { name: "Switzerland", zone: "+1" },
+            { name: "Denmark", zone: "+1" },
+            { name: "Norway", zone: "+1" },
+            { name: "Sweden", zone: "+1" },
+            { name: "Poland", zone: "+1" },
+            { name: "Algeria", zone: "+1" },
+            { name: "Tunisia", zone: "+1" },
+
+            { name: "Eastern Europe", zone: "+2" },
+            { name: "Greece", zone: "+2" },
+            { name: "Egypt", zone: "+2" },
+            { name: "South Africa", zone: "+2" },
+            { name: "Israel", zone: "+2" },
+            { name: "Cyprus", zone: "+2" },
+            { name: "Romania", zone: "+2" },
+            { name: "Finland", zone: "+2" },
+            { name: "Ukraine", zone: "+2" },
+            { name: "Moldova", zone: "+2" },
+
+            { name: "Eastern Africa", zone: "+3" },
+            { name: "Turkey", zone: "+3" },
+            { name: "Russia (Moscow)", zone: "+3" },
+            { name: "Saudi Arabia", zone: "+3" },
+            { name: "Kenya", zone: "+3" },
+            { name: "Iraq", zone: "+3" },
+            { name: "Syria", zone: "+3" },
+            { name: "Jordan", zone: "+3" },
+            { name: "Lebanon", zone: "+3" },
+            { name: "Somalia", zone: "+3" },
+            { name: "Yemen", zone: "+3" },
+
+            { name: "Iran", zone: "+3:30" },
+
+            { name: "Arabian Peninsula", zone: "+4" },
+            { name: "UAE", zone: "+4" },
+            { name: "Mauritius", zone: "+4" },
+            { name: "Armenia", zone: "+4" },
+            { name: "Azerbaijan", zone: "+4" },
+            { name: "Georgia", zone: "+4" },
+            { name: "Oman", zone: "+4" },
+            { name: "Reunion", zone: "+4" },
+            { name: "Seychelles", zone: "+4" },
+
+            { name: "Central Asia", zone: "+5" },
+            { name: "Pakistan", zone: "+5" },
+            { name: "Maldives", zone: "+5" },
+            { name: "Kazakhstan", zone: "+5" },
+            { name: "Uzbekistan", zone: "+5" },
+            { name: "Tajikistan", zone: "+5" },
+            { name: "Turkmenistan", zone: "+5" },
+
+            { name: "Indian Subcontinent", zone: "+5:30" },
+            { name: "India", zone: "+5:30" },
+            { name: "Sri Lanka", zone: "+5:30" },
+
+            { name: "Nepal", zone: "+5:45" },
+
+            { name: "Bangladesh", zone: "+6" },
+            { name: "Bhutan", zone: "+6" },
+            { name: "Russia (Omsk)", zone: "+6" },
+            { name: "Kazakhstan (Eastern)", zone: "+6" },
+
+            { name: "Southeast Asia (Western)", zone: "+7" },
+            { name: "Cambodia", zone: "+7" },
+            { name: "Laos", zone: "+7" },
+            { name: "Thailand", zone: "+7" },
+            { name: "Vietnam", zone: "+7" },
+            { name: "Indonesia (Western)", zone: "+7" },
+
+            { name: "Southeast Asia (Eastern)", zone: "+8" },
+            { name: "Singapore", zone: "+8" },
+            { name: "Malaysia", zone: "+8" },
+            { name: "China", zone: "+8" },
+            { name: "Taiwan", zone: "+8" },
+            { name: "Philippines", zone: "+8" },
+            { name: "Russia (Irkutsk)", zone: "+8" },
+            { name: "Australia (Western)", zone: "+8" },
+
+            { name: "East Asia", zone: "+9" },
+            { name: "Japan", zone: "+9" },
+            { name: "South Korea", zone: "+9" },
+            { name: "North Korea", zone: "+9" },
+            { name: "Indonesia (Eastern)", zone: "+9" },
+
+            { name: "Australia (Central)", zone: "+9:30" },
+
+            { name: "Eastern Pacific", zone: "+10" },
+            { name: "Russia (Vladivostok)", zone: "+10" },
+            { name: "Australia (Eastern)", zone: "+10" },
+            { name: "Papua New Guinea", zone: "+10" },
+            { name: "Guam", zone: "+10" },
+
+            { name: "Pacific Islands", zone: "+11" },
+            { name: "Solomon Islands", zone: "+11" },
+            { name: "New Caledonia", zone: "+11" },
+
+            { name: "Far East Pacific", zone: "+12" },
+            { name: "New Zealand", zone: "+12" },
+            { name: "Fiji", zone: "+12" },
+            { name: "Marshall Islands", zone: "+12" }
+        ];
+
+        const timeElement = document.getElementById('time');
+        const countrySelect = document.getElementById('countrySelect');
+
+        // Populate country select dropdown
+        timeZones.forEach(country => {
+            const option = document.createElement('option');
+            option.value = country.zone;
+            option.textContent = `${country.name} (${country.zone})`;
+            countrySelect.appendChild(option);
+        });
+
+        function updateTime(timeZone = 'UTC') {
+            const now = new Date();
+            
+            // Create a formatter that uses the specified time zone
+            const formatter = new Intl.DateTimeFormat('en-US', {
+                timeZone: timeZone === 'UTC' ? 'UTC' : `Etc/GMT${timeZone > 0 ? '-' : '+'}${Math.abs(timeZone)}`,
+                year: 'numeric',
+                month: '2-digit',
+                day: '2-digit',
+                hour: '2-digit',
+                minute: '2-digit',
+                second: '2-digit',
+                hour12: false,
+                fractionalSecondDigits: 3
+            });
+
+            const formattedTime = formatter.format(now);
+            
+            // Reconstruct in desired UTC format
+            const utcTime = now.toISOString();
+            
+            timeElement.textContent = `Time ${timeZone === 'UTC' ? 'UTC' : timeZone}: ${utcTime}`;
         }
-        fetchNTPTime();
-        setInterval(fetchNTPTime, 1000);
+
+        // Initial time setup
+        updateTime();
+
+        // Add event listener for time zone selection
+        countrySelect.addEventListener('change', (event) => {
+            updateTime(event.target.value);
+        });
+
+        // Simulate NTP server functionality with periodic time updates
+        function ntpServerSimulation() {
+            updateTime(countrySelect.value);
+        }
+
+        // Update time every second
+        setInterval(ntpServerSimulation, 1000);
     </script>
 </body>
 </html>
